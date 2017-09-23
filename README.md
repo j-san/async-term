@@ -1,11 +1,15 @@
 
-# Asyncronus terminal UI that run your prefered shell
+# Asyncronus terminal UI
 
-I'm human, I don't want to wait for process to be done before typing the next command. I also like UI for human.
+I'm human, I don't want to wait for run to be done before typing my next command.
 
 ## install
 
-`npm install -g async-term`
+```
+npm install -g async-term
+
+async-term
+```
 
 ## Goal:
 
