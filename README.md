@@ -3,6 +3,8 @@
 
 I'm human, I don't want to wait for run to be done before typing my next command.
 
+![](./async-term.gif)
+
 ## install
 
 ```
