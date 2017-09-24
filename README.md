@@ -1,7 +1,7 @@
 
 # Asyncronus terminal UI
 
-I'm human, I don't want to wait for run to be done before typing my next command.
+I'm human, I don't want to wait for the end of run before typing my next command.
 
 ![](./async-term.gif)
 
