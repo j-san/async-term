@@ -7,10 +7,9 @@ I'm human, I don't want to wait for run to be done before typing my next command
 
 ## install
 
-```
-npm install -g async-term
-
-async-term
+```sh
+$ sudo npm install -g async-term
+$ async-term
 ```
 
 ## Goal:
