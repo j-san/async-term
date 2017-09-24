@@ -118,19 +118,23 @@ class Main extends React.Component {
                 run(this.state.command, this.state.pwd, this.state.shell);
                 this.setState({historyIndex: 0});
             }}>
-                <div className="form-group">
-                    <input className="form-control w-25 d-inline-block"
-                        placeholder="shell..."
-                        value={this.state.shell}
-                        onChange={(evt)=> {
-                            this.setState({shell: evt.target.value});
-                        }} />
-                    <input className="form-control w-75 d-inline-block"
-                        placeholder="cwd..."
-                        value={this.state.pwd}
-                        onChange={(evt)=> {
-                            this.setState({pwd: evt.target.value});
-                        }} />
+                <div className="form-group form-row row">
+                    <div className="col-3">
+                        <input className="form-control"
+                            placeholder="shell..."
+                            value={this.state.shell}
+                            onChange={(evt)=> {
+                                this.setState({shell: evt.target.value});
+                            }} />
+                    </div>
+                    <div className="col-9">
+                        <input className="form-control"
+                            placeholder="cwd..."
+                            value={this.state.pwd}
+                            onChange={(evt)=> {
+                                this.setState({pwd: evt.target.value});
+                            }} />
+                    </div>
                 </div>
                 <div className="form-group">
                     <input className="form-control"
