@@ -183,7 +183,7 @@ class Main extends React.Component {
                         onClick={()=> {
                             store.dispatch((state)=> {
                                 return Object.assign({}, state, {
-                                    procs: state.procs.filter((proc)=> !proc.running)
+                                    procs: state.procs.filter((proc)=> proc.running)
                                 });
                             })
                         }}>clear</button>
