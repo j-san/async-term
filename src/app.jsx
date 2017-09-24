@@ -48,6 +48,9 @@ function run(command, pwd, shell) {
         output: '',
         kill() {
             child.kill();
+        },
+        get running() {
+            return this.code === null;
         }
     };
 
@@ -150,11 +153,13 @@ class Main extends React.Component {
                 </div>
             </form>
             {this.props.store.getState().procs.map((proc, index)=> {
+                var color = proc.running ? 'muted' : proc.code ? 'danger' : 'success';
+                var exitCode = proc.running ? '...' : proc.code ? proc.code : '\u2713';
+
+
                 return <div key={index} className="my-1 card card-body">
-                    <h3 style={{
-                            color: proc.code === null ? 'grey' : proc.code ? 'red' : 'green'
-                        }}>
-                        {proc.command} {proc.code === null ? '...' : proc.code ? proc.code : '\u2713'}
+                    <h3 className={`text-${color}`}>
+                        {proc.command} {exitCode}
                         {proc.code === null &&
                             <button className="btn close"
                                 onClick={()=> {
@@ -178,7 +183,7 @@ class Main extends React.Component {
                         onClick={()=> {
                             store.dispatch((state)=> {
                                 return Object.assign({}, state, {
-                                    procs: []
+                                    procs: state.procs.filter((proc)=> !proc.running)
                                 });
                             })
                         }}>clear</button>
