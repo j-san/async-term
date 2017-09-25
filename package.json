@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "async-term": "bin/cli.js"
+    "async-term": "./cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.0.0-beta",
-    "electron": "^1.7.6",
+    "electron": "^1.7.8",
     "node-jsx": "^0.13.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
