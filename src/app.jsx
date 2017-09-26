@@ -3,9 +3,30 @@ var exec = require('child_process').exec;
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-// var Provider = require('react-redux').Provider;
-// var connect = require('react-redux').connect;
+var pty = require('pty.js');
+var Terminal = require('xterm');
 var Store = require('repatch').Store;
+
+const DEFAULT_ANSI_COLORS = [
+  // dark:
+  '#2e3436',
+  '#cc0000',
+  '#4e9a06',
+  '#c4a000',
+  '#3465a4',
+  '#75507b',
+  '#06989a',
+  '#d3d7cf',
+  // bright:
+  '#555753',
+  '#ef2929',
+  '#8ae234',
+  '#fce94f',
+  '#729fcf',
+  '#ad7fa8',
+  '#34e2e2',
+  '#eeeeec'
+];
 
 var initialState = localStorage.getItem('state');
 if(initialState) {
@@ -36,16 +57,77 @@ var KEY_UP = 38;
 var KEY_DOWN = 40;
 
 function run(command, pwd, shell) {
-    var child = exec(command, {
-        cwd: pwd,
-        shell: shell,
-        detached: true
+    var elem = document.createElement('div');
+    var term = new Terminal({
+      cols: 80,
+      rows: 24,
+      screenKeys: true
     });
+    term.open(elem, false);
+
+    var commandTokens = command.split(' ');
+    var child = pty.spawn(commandTokens.shift(), commandTokens, {
+        cols: 80,
+        rows: 30,
+        cwd: pwd,
+        env: process.env
+    });
+
     var proc = {
         command: command,
         child: child,
+        term: term,
         code: null,
-        output: '',
+        get output() {
+            var content = '';
+            this.term.buffer.lines.forEach((row)=> {
+                var prevStyle = '';
+                
+                line = row.map((c)=> {
+                    let bg = c[0] & 0x1ff;
+                    let fg = (c[0] >> 9) & 0x1ff;
+                    let style = '';
+                    let tag = '';
+
+                    ch = c[1];
+                    if (ch == '<') {
+                        ch = '&lt;';
+                    }
+                    if (ch == '>') {
+                        ch = '&gt;';
+                    } 
+                    if (ch == '&') {
+                        ch = '&amp;';
+                    }
+
+                    if (fg && fg < 256) {
+                        style += `color: ${DEFAULT_ANSI_COLORS[fg]};`;
+                    }
+                    if (bg && bg < 256) {
+                        style += `background-color: ${DEFAULT_ANSI_COLORS[bg]};`;
+                    }
+                    if (prevStyle && style != prevStyle) {
+                        prevStyle = style;
+                        tag += '</span>';
+                    }
+                    if (style && style != prevStyle) {
+                        prevStyle = style;
+                        tag += `<span style="${style}">`;
+                    }
+                    return tag + ch;
+                }).join('');
+                if (prevStyle) {
+                    line += '</span>';
+                }
+
+
+                content += line + '\n';
+            });
+            while (content && content.endsWith('\n')) {
+                content = content.slice(0, -1);
+            }
+            return content;
+        },
         kill() {
             child.kill();
         },
@@ -55,15 +137,13 @@ function run(command, pwd, shell) {
     };
 
     child.stdout.on('data', (data)=> {
-        console.log(`stdout: ${data}`);
-        proc.output += data;
+        term.write(data);
+    });
+
+    term.on('refresh', ()=> {
         store.dispatch((state)=> state);
     });
-    child.stderr.on('data', (data)=> {
-        console.log(`stderr: ${data}`);
-        proc.output += data;
-        store.dispatch((state)=> state);
-    });
+
     child.on('exit', (code)=> {
         console.log(`done: ${code}`);
         proc.code = code === null ? '?' : code;
@@ -160,7 +240,6 @@ class Main extends React.Component {
                 var color = proc.running ? 'muted' : proc.code ? 'danger' : 'success';
                 var exitCode = proc.running ? '...' : proc.code ? proc.code : '\u2713';
 
-
                 return <div key={index} className="my-1 card card-body">
                     <h3 className={`text-${color}`}>
                         {proc.command} {exitCode}
@@ -171,14 +250,9 @@ class Main extends React.Component {
                                 }}>×</button>
                         }
                     </h3>
-                    <pre style={{marginBottom: 0}}>
-                        {/*
-                        <button>output</button>
-                        <button>stdout</button>
-                        <button>stderr</button>
-                        */}
-                        {proc.output}
-                    </pre>
+                    <pre
+                        dangerouslySetInnerHTML={{__html: proc.output}} 
+                        style={{marginBottom: 0}}></pre>
                 </div>;
             })}
             {this.props.store.getState().procs.length > 0 &&
